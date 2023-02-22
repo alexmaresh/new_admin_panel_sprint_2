@@ -1,9 +1,36 @@
 version: '3'
+
+networks:
+  movies_network:
+    driver: bridge
+
 services:
-  service:
+  postgres:
+    image: postgres
+    container_name: postgres_movies
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+#      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+    networks:
+      - movies_network
+
+  movies_web:
     build: app
-    expose:
-      - "8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    networks:
+      - movies_network
 
   nginx:
     image: nginx:latest
@@ -12,6 +39,8 @@ services:
       - ./configs:/etc/nginx/conf.d:ro
       - ./data:/data/:ro
     depends_on:
-      - service
+      - movies_web
     ports:
       - "80:80"
+    networks:
+      - movies_network
