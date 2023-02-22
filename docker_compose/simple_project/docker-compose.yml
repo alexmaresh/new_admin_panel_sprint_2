@@ -6,7 +6,9 @@ networks:
 
 services:
   postgres:
-    image: postgres:13
+    build:
+      context: dockerfiles
+      dockerfile: docker_postgres.conf
     container_name: postgres_movies
     restart: always
     environment:
