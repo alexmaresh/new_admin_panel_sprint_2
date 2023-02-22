@@ -6,7 +6,7 @@ networks:
 
 services:
   postgres:
-    image: postgres
+    image: postgres:13
     container_name: postgres_movies
     restart: always
     environment:
@@ -14,14 +14,14 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./dbdata:/var/lib/postgresql/data
-#      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
       - movies_network
 
   movies_web:
+    platform: linux/amd64
     build: app
     env_file:
       - .env
@@ -31,6 +31,9 @@ services:
       - "8000:8000"
     networks:
       - movies_network
+    volumes:
+    - static_volume:/opt/app/static
+    - media_volume:/opt/app/media
 
   nginx:
     image: nginx:latest
@@ -38,9 +41,19 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./configs:/etc/nginx/conf.d:ro
       - ./data:/data/:ro
+      - static_volume:/opt/app/static
+      - media_volume:/opt/app/media
     depends_on:
       - movies_web
     ports:
       - "80:80"
     networks:
       - movies_network
+
+volumes:
+ static_volume:
+ media_volume:
+ postgres_data:
+
+
+
