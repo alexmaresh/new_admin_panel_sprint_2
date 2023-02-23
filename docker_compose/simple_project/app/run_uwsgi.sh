@@ -14,4 +14,5 @@ python manage.py compilemessages -l en -l ru
 set -e
 chown www-data:www-data /var/log
 
-uwsgi --strict --ini /etc/app/uwsgi.ini
+
+uwsgi --strict --ini uwsgi.ini
